@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-# %%
+
 csv_path = '../data/creditcard.csv'
 df = pd.read_csv(csv_path, sep=',')
 # %%
@@ -81,5 +81,91 @@ plt.show()
 # %%
 #Pairplot
 sns.pairplot(df)
+plt.show()
+# %%
+# Preprocessamento
+from sklearn.preprocessing import RobustScaler
+# Inicializa o RobustScaler
+rob_scaler = RobustScaler()
+
+# Cria um novo DataFrame para as colunas escalonadas
+df_scaled = df.copy()
+
+# Ajusta o scaler e transforma as colunas 'Amount' e 'Time'
+df_scaled['scaled_amount'] = rob_scaler.fit_transform(df[['Amount']])
+df_scaled['scaled_time'] = rob_scaler.fit_transform(df[['Time']])
+
+# Remove as colunas originais 'Time' e 'Amount'
+df_scaled.drop(['Time', 'Amount'], axis=1, inplace=True)
+
+# %%
+df_scaled.info()
+# %%
+# Aplicando Random Under-Sampling
+majority_class = df_scaled[df_scaled['Class'] == 0]  # Classe majoritária (uso legal)
+minority_class = df_scaled[df_scaled['Class'] == 1]  # Classe minoritária (fraude)
+
+minority_size = len(minority_class)
+
+# Reduz aleatoriamente a classe majoritária para o mesmo tamanho da classe minoritária
+majority_downsampled = majority_class.sample(n=minority_size, random_state=42)
+
+# Combina as classes reduzidas
+df_undersampled = pd.concat([majority_downsampled, minority_class])
+
+# Embaralha o dataset para evitar viés
+df_undersampled = df_undersampled.sample(frac=1, random_state=42).reset_index(drop=True)
+
+# Agora df_undersampled está balanceado
+print(df_undersampled['Class'].value_counts())
+# %%
+# Matriz Correlação para as colunas escalonadas e balanceada
+corr_matrix = df_undersampled.corr()
+
+plt.figure(figsize=(20,20))
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm_r', fmt='.2f')
+plt.title('Matriz Correlação')
+plt.show()
+# %%
+#Correlação positiva em: V4, V11, V2, V19
+f, axes = plt.subplots(ncols=4, figsize=(20,4))
+
+sns.boxplot(x='Class', y='V4', 
+            data=df_undersampled,
+            ax=axes[0])
+axes[0].set_title('V4 vs Class Positive Correlation')
+sns.boxplot(x='Class', y='V11', 
+            data=df_undersampled,
+            ax=axes[1])
+axes[1].set_title('V11 vs Class Positive Correlation')
+sns.boxplot(x='Class', y='V2', 
+            data=df_undersampled,
+            ax=axes[2])
+axes[2].set_title('V2 vs Class Positive Correlation')
+sns.boxplot(x='Class', y='V19', 
+            data=df_undersampled,
+            ax=axes[3])
+axes[3].set_title('V19 vs Class Positive Correlation')
+plt.show()
+
+#Correlação negativa em: V14, V12, V10, V9
+f, axes = plt.subplots(ncols=4, figsize=(20,4))
+
+sns.boxplot(x='Class', y='V14', 
+            data=df_undersampled,
+            ax=axes[0])
+axes[0].set_title('V14 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V12', 
+            data=df_undersampled,
+            ax=axes[1])
+axes[1].set_title('V12 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V10', 
+            data=df_undersampled,
+            ax=axes[2])
+axes[2].set_title('V10 vs Class Negative Correlation')
+sns.boxplot(x='Class', y='V9', 
+            data=df_undersampled,
+            ax=axes[3])
+axes[3].set_title('V9 vs Class Negative Correlation')
 plt.show()
 # %%
