@@ -16,3 +16,9 @@ Resumo:
 Pontos de Alerta:
 
 - O dataset contém, em sua maioria, dados de transações não fraudulentas. Utilizá-lo na forma como está pode influenciar o modelo ao causar overfitting, uma vez que o modelo pode aprender a assumir que a maioria das transações não são fraudulentas, comprometendo sua capacidade de identificar fraudes.
+
+
+// Excluir
+Balanceamento de Classes: Para lidar com esse problema, você pode usar técnicas como oversampling (ex.: SMOTE) ou undersampling para equilibrar as classes no dataset.
+Escolha de Métricas: Certifique-se de usar métricas como AUC-ROC, F1-Score ou Precisão/Recall, pois métricas tradicionais como acurácia podem ser enganosas em datasets desbalanceados.
+//
